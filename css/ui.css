@@ -14,7 +14,7 @@ body {
 }
 .music-player {
 	position: relative;
-	width: 350px;
+	width: 80%;
 	height: 290px;
 	margin: 50px auto;
 	box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
@@ -104,7 +104,6 @@ body {
 	content: "";
 	width: 10px;
 	height: 22px;
-	background: url("../images/tsqwz1N.png") no-repeat center;
 }
 .music-player .controls {
 	text-align: center;
@@ -127,26 +126,22 @@ body {
 }
 .music-player .controls .volume-level {
 	position: relative;
-	bottom: auto;
+	bottom: 0px;
 	width: 200px;
-	height: 2px;
+	height: 10px;
 	margin: 30px auto 0;
 	background: rgba(225, 225, 225, 0.3);
 }
 .music-player .controls .volume-level span {
-	height: 2px;
+	height: 10px;
+	position: relative;
+	bottom: 0px;
 }
-.music-player .controls .volume-level span:after {
-	right: -11px;
-	top: -8px;
-	width: 22px;
-	height: 22px;
-	background-image: url("../images/V5i67V2.png");
-}
+
 .music-player .controls .volume-level a {
 	position: absolute;
 	right: -32px;
-	top: -8px;
+	top: -5px;
 	width: 22px;
 }
 .music-player .controls .volume-level a.icon-volume-down {
