@@ -159,11 +159,11 @@
         options[1].onmouseover = function() {
             ILikeYou();
         };
-
+        var n = 2;
         function ILikeYou() {
-            var n = Math.ceil(Math.random() * 2);
+            
             if (getStyle(options[1], "top") == "-100px") {
-                n = 2
+                n = 2;
             }
             switch (n) {
                 case 1:
@@ -175,6 +175,7 @@
                         options[1].innerHTML = "喜欢";
                         options[0].innerHTML = "不喜欢";
                     }
+                    n = 2;
                     break;
                 case 2:
                     if (getStyle(options[1], "top") == "-100px") {
@@ -187,6 +188,7 @@
                             top: '-100px'
                         }, 100)
                     }
+                    n = 1;
                     break;
             }
 
