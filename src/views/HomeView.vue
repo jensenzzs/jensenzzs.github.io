@@ -56,7 +56,7 @@ let toneSampler: Tone.Sampler
 // soundfonts by https://github.com/gleitz/midi-js-soundfonts/tree/gh-pages 稍做处理这个比较全
 async function loadSoundfonts() {
   const { data: res } = await http.get(
-    `https://jensenzzs.github.io/midi-js-soundfonts/MusyngKite/${soundfontName.value}-mp3.js`
+    `/midi-js-soundfonts/MusyngKite/${soundfontName.value}-mp3.js`
   )
   const returnCode = 'return MIDI.Soundfont.' + soundfontName.value
   const code = res + returnCode
@@ -111,7 +111,7 @@ async function rendomNodeWithTone() {
   // }, '4n').start(0)
   //play another note every off quarter-note, by starting it "8n"
 
-  const loopB = new Tone.Loop((time) => {
+  new Tone.Loop((time) => {
     const randomNumber = Math.floor(Math.random() * noteList.length)
     noteStr.value = noteList[randomNumber]
     toneSampler.triggerAttackRelease(noteStr.value + '4', '2n', time)
