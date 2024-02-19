@@ -30,5 +30,9 @@ export default defineConfig({
   },
   build: {
     outDir: 'out-dist'
-  }
+  },
+
+  // 部署到github page 
+  // https://cn.vitejs.dev/guide/static-deploy.html#github-pages
+  base: "/zzs-site-front/"
 })
