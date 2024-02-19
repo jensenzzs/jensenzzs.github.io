@@ -55,7 +55,7 @@ let toneSampler: Tone.Sampler
 // soundfonts by https://github.com/gleitz/midi-js-soundfonts/tree/gh-pages 稍做处理这个比较全
 async function loadSoundfonts() {
   const { data: res } = await http.get(
-    `/midi-js-soundfonts/MusyngKite/${soundfontName.value}-mp3.js`
+    `https://gleitz.github.io/midi-js-soundfonts/MusyngKite/${soundfontName.value}-mp3.js`
   )
   const returnCode = 'return MIDI.Soundfont.' + soundfontName.value
   const code = res + returnCode
