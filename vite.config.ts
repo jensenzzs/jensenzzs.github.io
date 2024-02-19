@@ -21,7 +21,7 @@ export default defineConfig({
     proxy: {
       // 匹配 /midi-js-soundfonts 开头的请求代理到 https://gleitz.github.io/midi-js-soundfonts，
       // 设置 changeOrigin 为 true，更改源地址，以解决跨域问题。
-      '/midi-js-soundfonts': {
+      '/midi-js-soundfonts-1': {
         target: 'https://gleitz.github.io/midi-js-soundfonts',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/midi-js-soundfonts/, '') // 不可以省略rewrite
