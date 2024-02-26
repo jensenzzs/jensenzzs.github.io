@@ -3,12 +3,45 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
     vueJsx(),
+
+    // 配置PWA应用
+    VitePWA({
+      injectRegister: 'auto',
+      registerType: 'autoUpdate',
+      devOptions: {
+        enabled: true
+      },
+      includeAssets: ['logo.svg', 'apple-touch-icon.png', 'mask-icon.svg', 'favicon.png'], // 应该是下面 manifest 中可能用到的文件名字吧
+      manifest: {
+        name: 'Holy shit App',
+        short_name: "Shit",
+        theme_color: "#373737",
+        // start_url: "./",
+        // display: "standalone",
+        // background_color: "#373737",
+        icons: [
+          {
+            src: "logo.svg",
+            sizes: "512x512",
+            type: "image/svg+xml",
+            purpose: "any",
+          },
+          // {
+          //   src: "appicon-apple.png",
+          //   sizes: "512x512",
+          //   type: "image/png",
+          //   purpose: "any",
+          // },
+        ],
+      },
+    })
   ],
   resolve: {
     alias: {
