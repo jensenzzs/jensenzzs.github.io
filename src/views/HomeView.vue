@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { NConfigProvider, NButton, NInput} from 'naive-ui'
+import { NConfigProvider, NButton, NInput } from 'naive-ui'
 import {
   NSpace,
   NLayout,
+  NSlider,
+  NInputNumber,
   NLayoutSider,
   NLayoutHeader,
   NLayoutContent,
@@ -16,40 +18,49 @@ import type { GlobalTheme } from 'naive-ui'
 import type { NLocale, NDateLocale } from 'naive-ui'
 
 import * as Tone from 'tone'
+import { Note, Interval, Midi } from 'tonal'
 import http from '@/utils/http'
 
 const theme = ref<GlobalTheme | null>(darkTheme)
 const locale = ref<NLocale | null>(zhCN)
 const dateLocale = ref<NDateLocale | null>(dateZhCN)
 
-const noteList = [
-  'A',
-  'B',
-  'C',
-  'D',
-  'E',
-  'F',
-  'G'
-  //   'A#',
-  //   'B#',
-  //   'C#',
-  //   'D#',
-  //   'E#',
-  //   'F#',
-  //   'G#',
-  //   'Ab',
-  //   'Bb',
-  //   'Cb',
-  //   'Db',
-  //   'Eb',
-  //   'Fb',
-  //   'Gb'
-]
+const whiteKeyNoteList = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+const sharpNoteList = ['A#', 'B#', 'C#', 'D#', 'E#', 'F#', 'G#']
+const flatNoteList = ['Ab', 'Bb', 'Cb', 'Db', 'Eb', 'Fb', 'Gb']
 const noteStr = ref('')
 const soundfontName = ref('acoustic_guitar_steel')
 const soundfontLoaded = ref(false)
-
+let intervalNames = [
+  '1P',
+  '2m',
+  '2M',
+  '3m',
+  '3M',
+  '4P',
+  '4A',
+  '5d',
+  '5P',
+  '6m',
+  '6M',
+  '7m',
+  '7M',
+  '8P'
+]
 let toneSampler: Tone.Sampler
+
+const sliderScope = [21, 100]
+const noteScope = ref([61, 71])
+
+onMounted(() => {
+  intervalNames = Interval.names()
+  intervalNames.push('8P')
+  console.log(intervalNames)
+  const res = Note.transpose('C4', '4A')
+  console.log(res)
+  console.log(Midi.toMidi('A0'))
+  console.log(Midi.toMidi('E7'))
+})
 
 // Tone.js
 // soundfonts by https://github.com/danigb/samples, bug lack samples！！！
@@ -112,18 +123,39 @@ async function rendomNodeWithTone() {
   //play another note every off quarter-note, by starting it "8n"
 
   new Tone.Loop((time) => {
-    const randomNumber = Math.floor(Math.random() * noteList.length)
-    noteStr.value = noteList[randomNumber]
+    noteStr.value = randomListItem(whiteKeyNoteList)
+    const intervalName = randomListItem(intervalNames)
+    const note2 = Note.transpose(noteStr.value, intervalName)
     toneSampler.triggerAttackRelease(noteStr.value + '4', '2n', time)
   }, '1n').start(0)
+
   // all loops start until the Transport is started
-  
   Tone.Transport.start()
 }
 
 function stop() {
   Tone.Transport.cancel()
   Tone.Transport.stop()
+}
+
+function randomMidiInterval() {
+  const intervalValueArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11, 12]
+  const intervalValue = randomListItem(intervalValueArr);
+  const minMidiValue = noteScope.value[0];
+  const maxMidiValue = noteScope.value[1] - intervalValue;
+  const randomMidiValue = randomBetween(minMidiValue, maxMidiValue)
+  Midi.midiToNoteName(value)
+  return [randomMidiValue, ]
+}
+
+
+function randomListItem(list: any): any {
+  const randomNumber = Math.floor(Math.random() * list.length)
+  return list[randomNumber]
+}
+
+function randomBetween(min: number, max: number): number{
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 </script>
 
@@ -149,6 +181,16 @@ function stop() {
             <n-button @click="rendomNodeWithTone"> tone </n-button>
             <n-button @click="stop"> 结束 </n-button>
             <div>{{ noteStr }}</div>
+
+            <n-slider
+              :format-tooltip="Midi.midiToNoteName"
+              :min="sliderScope[0]"
+              :max="sliderScope[1]"
+              v-model:value="noteScope"
+              range
+              :step="1"
+            >
+            </n-slider>
           </n-layout-content>
 
           <n-layout-sider
