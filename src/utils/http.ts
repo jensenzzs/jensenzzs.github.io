@@ -9,7 +9,7 @@ const host = window.location.host; // 主机(主机名+端口号)(localhost:8080
 const reg = /^localhost+/;
 if (reg.test(host)) {
   //若本地项目调试使用
-  axios.defaults.baseURL = 'http://localhost:8080';
+  // axios.defaults.baseURL = 'http://localhost:8080';
   // axios.defaults.baseURL = 'http://172.17.137.235:8030';
   // axios.defaults.baseURL = 'https://cfmock.test.bestpay.net/';
 } else {
@@ -22,7 +22,7 @@ axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 // 接口错误处理
 function errHandler(err: string) {
-  message.error('接口调用失败: ' + err );
+  message.error('接口调用失败: ' + err);
 }
 
 // 接口响应拦截处理

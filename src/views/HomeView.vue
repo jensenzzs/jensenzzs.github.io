@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { NConfigProvider, NButton, NInput } from 'naive-ui'
 import {
   NSpace,
   NLayout,
   NSlider,
+  NSelect,
   NInputNumber,
   NLayoutSider,
   NLayoutHeader,
@@ -25,32 +26,42 @@ const theme = ref<GlobalTheme | null>(darkTheme)
 const locale = ref<NLocale | null>(zhCN)
 const dateLocale = ref<NDateLocale | null>(dateZhCN)
 
+let intervalNames = ['1P', '2M', '3M', '4P', '4A', '5d', '5P', '6M', '7M',]
 const whiteKeyNoteList = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 const sharpNoteList = ['A#', 'B#', 'C#', 'D#', 'E#', 'F#', 'G#']
 const flatNoteList = ['Ab', 'Bb', 'Cb', 'Db', 'Eb', 'Fb', 'Gb']
-const noteStr = ref('')
-const soundfontName = ref('acoustic_guitar_steel')
-const soundfontLoaded = ref(false)
-let intervalNames = [
-  '1P',
-  '2m',
-  '2M',
-  '3m',
-  '3M',
-  '4P',
-  '4A',
-  '5d',
-  '5P',
-  '6m',
-  '6M',
-  '7m',
-  '7M',
-  '8P'
+const sliderScope = [21, 100]
+const soundfontOptions = [
+  {
+    label: "原声钢琴",
+    value: "acoustic_grand_piano",
+  },
+  {
+    label: "明亮原声钢琴",
+    value: "bright_acoustic_piano",
+  },
+  {
+    label: "电钢琴",
+    value: "electric_grand_piano",
+  },
+  {
+    label: "原声吉他",
+    value: "acoustic_guitar_steel",
+  }
 ]
+
+const noteStr = ref('')
+const soundfontsObj = ref({})
+const soundfontName = ref('acoustic_grand_piano')
+const soundfontLoaded = ref(false)
+const bpm = ref(80)
+
 let toneSampler: Tone.Sampler
 
-const sliderScope = [21, 100]
+
 const noteScope = ref([61, 71])
+const pitchInterval = ref<string>("")
+const intervalNotes = ref<string[]>([])
 
 onMounted(() => {
   intervalNames = Interval.names()
@@ -62,26 +73,49 @@ onMounted(() => {
   console.log(Midi.toMidi('E7'))
 })
 
-// Tone.js
-// soundfonts by https://github.com/danigb/samples, bug lack samples！！！
-// soundfonts by https://github.com/gleitz/midi-js-soundfonts/tree/gh-pages 稍做处理这个比较全
-async function loadSoundfonts() {
+watch(
+  bpm,
+  (value) => {
+    if (!value) {
+      return
+    }
+    Tone.Transport.bpm.value = value;
+  },
+  { deep: true }
+);
+
+function loadSoundfontsCache(): boolean {
+  const localSf = localStorage.getItem('soundfonts:' + soundfontName.value)
+  if (localSf) {
+    soundfontsObj.value = JSON.parse(localSf);
+    return true;
+  }
+  return false;
+}
+
+async function loadSoundfontsRemote() {
   const { data: res } = await http.get(
     `/midi-js-soundfonts/MusyngKite/${soundfontName.value}-mp3.js`
   )
   const returnCode = 'return MIDI.Soundfont.' + soundfontName.value
   const code = res + returnCode
   const soundfontFunc = new Function(code)
-  const noteBase64 = soundfontFunc()
-  // 采样
+  soundfontsObj.value = soundfontFunc()
+  localStorage['soundfonts:' + soundfontName.value] = JSON.stringify(soundfontsObj.value)
+}
+
+// Tone.js
+// soundfonts by https://github.com/danigb/samples, bug lack samples！！！
+// soundfonts by https://github.com/gleitz/midi-js-soundfonts/tree/gh-pages 稍做处理这个比较全
+async function loadSoundfontsSampler() {
+  const success = loadSoundfontsCache();
+  if (!success) {
+    await loadSoundfontsRemote()
+  }
+  // 加载采样
   toneSampler = new Tone.Sampler({
     // 支持根据url拼接
     // urls: {
-    //   C4: 'PP-C4.ogg',
-    //   // 'D#4': 'PP-D#4.ogg',
-    //   // 'F#4': 'PP-F#4.ogg',
-    //   A4: 'PP-A4.ogg',
-    //   C3: 'PP-C3.ogg',
     //   E3: 'PP-E3.ogg',
     //   G3: 'PP-G3.ogg'
     // },
@@ -92,8 +126,7 @@ async function loadSoundfonts() {
     //   A0: 'data:audio/mp3;base64,//uQRAAAAVVVVVVU=',
     //   Bb0: 'data:audio/mp3;base64,//uQRAAAqqqqqqq'
     // }
-
-    urls: noteBase64
+    urls: soundfontsObj.value
   }).toDestination()
 
   Tone.loaded().then(() => {
@@ -103,12 +136,14 @@ async function loadSoundfonts() {
 
 function playTone() {
   const now = Tone.now()
-  toneSampler.triggerAttack('C4', now)
-  toneSampler.triggerAttack('E4', now + 0.5)
-  toneSampler.triggerAttack('G4', now + 1)
-  toneSampler.triggerAttack('C5', now + 1.5)
-  toneSampler.triggerAttack('E5', now + 2)
-  toneSampler.triggerAttack(['C3', 'G3', 'E3'], now + 4)
+  // toneSampler.triggerAttack('C4', now)
+  // toneSampler.triggerAttack('E4', now + 0.5)
+  // toneSampler.triggerAttack('G4', now + 1)
+  // toneSampler.triggerAttack('C5', now + 1.5)
+  // toneSampler.triggerAttack('E5', now + 2)
+  // toneSampler.triggerAttack(['C3', 'G3', 'E3'], now + 4)
+
+  toneSampler.triggerAttack(intervalNotes.value, now)
 }
 
 async function rendomNodeWithTone() {
@@ -123,10 +158,9 @@ async function rendomNodeWithTone() {
   //play another note every off quarter-note, by starting it "8n"
 
   new Tone.Loop((time) => {
-    noteStr.value = randomListItem(whiteKeyNoteList)
-    const intervalName = randomListItem(intervalNames)
-    const note2 = Note.transpose(noteStr.value, intervalName)
-    toneSampler.triggerAttackRelease(noteStr.value + '4', '2n', time)
+    intervalNotes.value = randomNoteInterval()
+
+    toneSampler.triggerAttackRelease(intervalNotes.value, '2n', time)
   }, '1n').start(0)
 
   // all loops start until the Transport is started
@@ -138,14 +172,16 @@ function stop() {
   Tone.Transport.stop()
 }
 
-function randomMidiInterval() {
-  const intervalValueArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11, 12]
-  const intervalValue = randomListItem(intervalValueArr);
+function randomNoteInterval(): [string, string] {
+  const semitonesArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  const semitone = randomListItem(semitonesArr);
   const minMidiValue = noteScope.value[0];
-  const maxMidiValue = noteScope.value[1] - intervalValue;
+  const maxMidiValue = noteScope.value[1] - semitone;
   const randomMidiValue = randomBetween(minMidiValue, maxMidiValue)
-  Midi.midiToNoteName(value)
-  return [randomMidiValue, ]
+  const node1 = Midi.midiToNoteName(randomMidiValue)
+  pitchInterval.value = Interval.fromSemitones(semitone);
+  const node2 = Note.transpose(node1, pitchInterval.value)
+  return [node1, node2]
 }
 
 
@@ -154,7 +190,7 @@ function randomListItem(list: any): any {
   return list[randomNumber]
 }
 
-function randomBetween(min: number, max: number): number{
+function randomBetween(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 </script>
@@ -168,45 +204,29 @@ function randomBetween(min: number, max: number): number{
           <n-button @click="theme = darkTheme"> 深色 </n-button>
           <n-button @click="theme = lightTheme"> 浅色 </n-button>
         </n-layout-header>
-        <n-layout
-          has-sider
-          sider-placement="right"
-          position="absolute"
-          style="top: 64px; bottom: 64px"
-        >
+        <n-layout has-sider sider-placement="right" position="absolute" style="top: 64px; bottom: 64px">
           <n-layout-content ref="contentRef" content-style="padding: 0;" :native-scrollbar="false">
-            <n-input v-model:value="soundfontName" type="text" placeholder="请输入" />
-            <n-button @click="loadSoundfonts"> 加载 tone </n-button>
+            <!-- <n-input v-model:value="soundfontName" type="text" placeholder="请输入" /> -->
+            <n-select v-model:value="soundfontName" :options="soundfontOptions" />
+            <n-input-number v-model:value="bpm" :step="10" button-placement="both" />
+            <n-button @click="loadSoundfontsSampler"> 加载 tone </n-button>
             <n-button @click="playTone" :disabled="!soundfontLoaded"> play tone </n-button>
             <n-button @click="rendomNodeWithTone"> tone </n-button>
             <n-button @click="stop"> 结束 </n-button>
             <div>{{ noteStr }}</div>
 
-            <n-slider
-              :format-tooltip="Midi.midiToNoteName"
-              :min="sliderScope[0]"
-              :max="sliderScope[1]"
-              v-model:value="noteScope"
-              range
-              :step="1"
-            >
+            <n-slider :format-tooltip="Midi.midiToNoteName" :min="sliderScope[0]" :max="sliderScope[1]"
+              v-model:value="noteScope" range :step="1">
             </n-slider>
+            <div>{{ intervalNotes[0] + "---" + intervalNotes[1] }}</div>
+            <div>{{ pitchInterval }}</div>
           </n-layout-content>
 
-          <n-layout-sider
-            ref="siderRef"
-            collapse-mode="transform"
-            :collapsed-width="20"
-            :width="240"
-            show-trigger="arrow-circle"
-            bordered
-            content-style="padding: 24px;"
-          >
+          <n-layout-sider ref="siderRef" collapse-mode="transform" :collapsed-width="20" :width="240"
+            show-trigger="arrow-circle" bordered content-style="padding: 24px;">
           </n-layout-sider>
         </n-layout>
-        <n-layout-footer bordered position="absolute" style="height: 64px; padding: 24px"
-          >footer</n-layout-footer
-        >
+        <n-layout-footer bordered position="absolute" style="height: 64px; padding: 24px">footer</n-layout-footer>
       </n-layout>
     </n-space>
   </n-config-provider>

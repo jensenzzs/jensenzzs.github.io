@@ -12,12 +12,9 @@
     }
   ],
   "compilerOptions": {
+    // "moduleResolution": "node",
     // ...
-    "types": [
-      "naive-ui/volar"
-    ]
+    "types": ["naive-ui/volar"]
   },
-  "include": [
-    "vue.d.ts"
- ],
+  "include": ["vue.d.ts"]
 }
