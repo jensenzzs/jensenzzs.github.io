@@ -12,7 +12,7 @@
     }
   ],
   "compilerOptions": {
-    // "moduleResolution": "node",
+    "moduleResolution": "node",
     // ...
     "types": ["naive-ui/volar"]
   },
