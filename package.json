@@ -15,6 +15,8 @@
   },
   "dependencies": {
     "axios": "^1.6.7",
+    "framework7": "^8.3.2",
+    "framework7-vue": "^8.3.2",
     "midicube": "^0.6.2",
     "pinia": "^2.1.7",
     "smplr": "^0.12.1",
