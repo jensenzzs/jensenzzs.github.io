@@ -5,21 +5,21 @@
     <a href="" @click="navigate">aaaa</a>
   </f7-page>
 </template>
-<script>
-export default {
-  // define props so the component will receive it
-  props: {
-    f7route: Object,
-    f7router: Object,
-  },
+<script setup lang="ts">
 
-  mounted() {
-    console.log(this.f7route.url)
-  },
-  methods: {
-    navigate() {
-      this.f7router.back()
-    }
+import { defineProps, defineEmits, ref, reactive, onMounted, nextTick, defineExpose } from 'vue';
+
+const props = defineProps({
+  f7route: Object,
+  f7router: Object,
+})
+
+onMounted(() => {
+})
+
+function navigate() {
+  if (props.f7router) {
+    props.f7router.back()
   }
-};
+}
 </script>

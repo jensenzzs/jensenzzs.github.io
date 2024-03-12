@@ -7,39 +7,31 @@
     <f7-view main url="/"></f7-view>
   </f7-app>
 </template>
-<script>
-// import router from './router';
+<script setup lang="ts">
 
 import AboutPage from '@/views/AboutPage.vue'
 import HomePage from '@/views/HomePage.vue'
 import LoginPage from '@/views/LoginPage.vue'
 
-export default {
-  data() {
-    return {
-      // Framework7 parameters that we pass to <f7-app> component
-      f7params: {
-        // Array with app routes
-        // routes: router.getRoutes(),
-        // App Name
-        name: 'My App',
-        // ...
-        routes: [
-          {
-            path: '/',
-            component: HomePage,
-          },
-          {
-            path: '/about',
-            component: AboutPage,
-          },
-          {
-            path: '/login',
-            component: LoginPage,
-          },
-        ],
-      }
-    }
-  }
+const f7params = {
+  // Array with app routes
+  // routes: router.getRoutes(),
+  // App Name
+  name: 'My App',
+  // ...
+  routes: [
+    {
+      path: '/',
+      component: HomePage,
+    },
+    {
+      path: '/about',
+      component: AboutPage,
+    },
+    {
+      path: '/login',
+      component: LoginPage,
+    },
+  ],
 }
 </script>
