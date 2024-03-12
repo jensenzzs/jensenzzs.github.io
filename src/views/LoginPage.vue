@@ -4,6 +4,5 @@
         <!-- Page content -->
     </f7-page>
 </template>
-<script>
-export default {}
+<script setup>
 </script>
