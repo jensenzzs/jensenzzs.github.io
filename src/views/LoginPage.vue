@@ -4,5 +4,5 @@
         <!-- Page content -->
     </f7-page>
 </template>
-<script setup>
+<script setup lang="ts">
 </script>
